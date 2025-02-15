@@ -2,10 +2,11 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>TV Streaming</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
+        /* Styles de base */
         body {
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #1e1e1e, #3a3a3a);
@@ -17,6 +18,12 @@
             position: relative;
         }
 
+        /* Pour empêcher le zoom sur les smartphones */
+        html, body {
+            touch-action: manipulation;
+        }
+
+        /* Heure en haut à droite */
         .header {
             position: absolute;
             top: 10px;
@@ -24,6 +31,32 @@
             font-size: 1.5em;
         }
 
+        /* Conteneur pour les vidéos et boutons */
+        #video-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        video {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        iframe {
+            width: 100%;
+            max-width: 800px;
+            height: 450px;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Liste des chaînes */
         .container {
             display: flex;
             flex-wrap: wrap;
@@ -53,40 +86,64 @@
             border-radius: 5px;
         }
 
-        #video-container {
+        /* Style des boutons */
+        .button-container {
+            display: flex;
+            justify-content: center;
             margin-top: 20px;
         }
 
-        video {
-            width: 80%;
-            max-width: 800px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        .btn {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
 
-        iframe {
-            width: 80%;
-            max-width: 800px;
-            height: 450px;
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .btn:focus {
+            outline: none;
+        }
+
+        /* Empêcher le zoom sur mobile */
+        body, html {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
     </style>
 </head>
 <body>
     <div class="header" id="clock"></div>
     <h1>TV Streaming</h1>
+    
+    <!-- Conteneur de la vidéo -->
     <div id="video-container">
-        <video id="video" controls></video>
+        <video id="video" controls style="display:none;"></video>
         <div id="dailymotion-container" style="display:none;">
             <iframe id="dailymotion-iframe" src="" allow="autoplay; encrypted-media" frameborder="0"></iframe>
         </div>
     </div>
 
+    <!-- Liste des chaînes -->
     <div class="container" id="channel-list"></div>
 
+    <!-- Boutons pour descendre -->
+    <div class="button-container">
+        <button class="btn" id="scrollDownBtn">Descendre</button>
+    </div>
+
     <script>
+        // Fonction pour afficher l'heure
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString();
@@ -94,7 +151,8 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-              const channels = [
+        // Liste des chaînes de TV et leurs liens
+        const channels = [
             { name: "TF1", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/tf1plus/tf1.m3u8", logo: "tf1.png" },
             { name: "France 2", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france2.m3u8", logo: "france2.png" },
             { name: "France 3", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france3.m3u8", logo: "france3.png" },
@@ -113,7 +171,11 @@
             { name: "Cherry 25", stream: "cherry25.m3u8", logo: "cherry.png" },
             { name: "France Info", stream: "https://raw.githubusercontent.com/ipstreet312/freeiptv/master/ressources/ftv/py/frin.m3u8", logo: "franceinfo.png" },
             { name: "LCI", stream: "https://raw.githubusercontent.com/ipstreet312/freeiptv/master/ressources/btv/py/lci1.m3u8", logo: "lci.png" }
-        ];        function loadChannels() {
+        ];
+
+
+        // Fonction pour charger les chaînes
+        function loadChannels() {
             const container = document.getElementById("channel-list");
             container.innerHTML = "";
 
@@ -129,6 +191,7 @@
             });
         }
 
+        // Fonction pour lire le flux vidéo
         function playChannel(streamUrl) {
             const video = document.getElementById("video");
             const dailymotionContainer = document.getElementById("dailymotion-container");
@@ -159,6 +222,11 @@
                 dailymotionContainer.style.display = "block";
             }
         }
+
+        // Fonction pour faire défiler la page vers le bas
+        document.getElementById("scrollDownBtn").addEventListener("click", function() {
+            window.scrollBy(0, 600); // Faire défiler de 600px
+        });
 
         loadChannels();
     </script>
