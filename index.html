@@ -3,82 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecteur TV</title>
+    <title>TV Streaming</title>
     <style>
-        .player-container {
-            max-width: 800px;
-            margin: 20px auto;
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e1e1e, #3a3a3a);
+            color: white;
             text-align: center;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
         }
-        .logo {
+
+        .header {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 1.5em;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .channel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px;
+            width: 250px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .channel:hover {
+            transform: scale(1.05);
+        }
+
+        .channel img {
             width: 100px;
             height: auto;
-            margin: 10px;
+            border-radius: 5px;
         }
-        .channel-button {
-            display: inline-block;
-            text-align: center;
-            margin: 10px;
-            cursor: pointer;
+
+        #video-container {
+            margin-top: 20px;
+        }
+
+        video {
+            width: 80%;
+            max-width: 800px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
 <body>
-    <div class="player-container">
-        <h1>Lecteur TV</h1>
-        <video id="videoPlayer" width="100%" controls>
-            Votre navigateur ne supporte pas la balise vidéo.
-        </video>
-        <div id="channelList"></div>
+    <div class="header" id="clock"></div>
+    <h1>TV Streaming</h1>
+    <div id="video-container">
+        <video id="video" controls></video>
     </div>
 
+    <div class="container" id="channel-list"></div>
+
     <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Liste des chaînes avec leurs fichiers vidéo GitHub.io
         const channels = [
             { name: "TF1", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/tf1plus/tf1.m3u8", logo: "tf1.png" },
             { name: "France 2", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france2.m3u8", logo: "france2.png" },
             { name: "France 3", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france3.m3u8", logo: "france3.png" },
-            { name: "Canal+", stream: "https://geo.dailymotion.com/player.html?video=x5gv6be", logo: "canal.png" },
+            { name: "Canal+", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/canal/canalplus.m3u8", logo: "canal.png" },
             { name: "France 5", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france5.m3u8", logo: "france5.png" },
-            { name: "Arte", stream: "https://geo.dailymotion.com/player.html?video=xgepjr", logo: "arte.png" },
-            { name: "LCP", stream: "https://geo.dailymotion.com/player.html?video=xkxbzc", logo: "lcp.png" },
-            { name: "Public Sénat", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france4.m3u8", logo: "public.png" },
-            { name: "BFM TV", stream: "bfmtv.m3u8", logo: "bfm.png" },
-            { name: "CNews", stream: "https://www.dailymotion.com/video/x3b68jn", logo: "cnwes.png" },
-            { name: "CStar", stream: "https://geo.dailymotion.com/player.html?video=x5gv5v0", logo: "cstar.png" },
-            { name: "TF1 Series Films", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/tf1plus/tf1-series-films.m3u8", logo: "tf1sf.png" },
-            { name: "L'Equipe", stream: "https://geo.dailymotion.com/player.html?video=x2lefik", logo: "equipe.png" },
-            { name: "RMC Story", stream: "rmcstory.m3u8", logo: "rmcstory.png" },
-            { name: "RMC Découverte", stream: "rmcdecouverte.m3u8", logo: "rmcdecouverte.png" },
-            { name: "Cherry 25", stream: "cherry25.m3u8", logo: "cherry.png" },
-            { name: "France Info", stream: "https://raw.githubusercontent.com/ipstreet312/freeiptv/master/ressources/ftv/py/frin.m3u8", logo: "franceinfo.png" },
-            { name: "LCI", stream: "https://raw.githubusercontent.com/ipstreet312/freeiptv/master/ressources/btv/py/lci1.m3u8", logo: "lci.png" }
+            { name: "Arte", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/arte/arte.m3u8", logo: "arte.png" },
+            { name: "LCP", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/lcp/lcp.m3u8", logo: "lcp.png" },
+            { name: "Public Sénat", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/publicsenat/publicsenat.m3u8", logo: "public.png" },
+            { name: "BFM TV", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/bfmtv/bfmtv.m3u8", logo: "bfm.png" },
+            { name: "CNews", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/cnews/cnews.m3u8", logo: "cnwes.png" }
+            // Tu peux ajouter d'autres chaînes avec leurs fichiers vidéos sur GitHub ici
         ];
 
-        const videoPlayer = document.getElementById('videoPlayer');
-        const channelList = document.getElementById('channelList');
+        function loadChannels() {
+            const container = document.getElementById("channel-list");
+            container.innerHTML = "";
 
-        // Fonction pour charger un canal
-        function loadChannel(channel) {
-            if (channel.stream.includes("dailymotion")) {
-                videoPlayer.src = channel.stream; // URL Dailymotion
-            } else {
-                videoPlayer.src = channel.stream; // URL M3U8
-            }
-            videoPlayer.play();
+            channels.forEach(channel => {
+                const channelDiv = document.createElement("div");
+                channelDiv.classList.add("channel");
+                channelDiv.innerHTML = `
+                    <img src="${channel.logo}" alt="${channel.name} Logo">
+                    <h3>${channel.name}</h3>
+                `;
+                channelDiv.addEventListener("click", () => playChannel(channel.stream));
+                container.appendChild(channelDiv);
+            });
         }
 
-        // Créer la liste de chaînes
-        channels.forEach(channel => {
-            const channelDiv = document.createElement('div');
-            channelDiv.classList.add('channel-button');
+        function playChannel(streamUrl) {
+            const video = document.getElementById("video");
+            video.src = streamUrl; // Mettre directement l'URL du flux vidéo depuis GitHub.io
+            video.play();
+        }
 
-            channelDiv.innerHTML = `
-                <img src="${channel.logo}" alt="${channel.name}" class="logo">
-                <br>
-                <button onclick="loadChannel(${JSON.stringify(channel)})">${channel.name}</button>
-            `;
-            channelList.appendChild(channelDiv);
-        });
+        loadChannels();
     </script>
 </body>
 </html>
