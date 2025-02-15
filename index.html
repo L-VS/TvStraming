@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TV Streaming</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -62,6 +63,15 @@
             border-radius: 10px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
         }
+
+        iframe {
+            width: 80%;
+            max-width: 800px;
+            height: 450px;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -69,6 +79,9 @@
     <h1>TV Streaming</h1>
     <div id="video-container">
         <video id="video" controls></video>
+        <div id="dailymotion-container" style="display:none;">
+            <iframe id="dailymotion-iframe" src="" allow="autoplay; encrypted-media" frameborder="0"></iframe>
+        </div>
     </div>
 
     <div class="container" id="channel-list"></div>
@@ -81,22 +94,26 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Liste des chaînes avec leurs fichiers vidéo GitHub.io
-        const channels = [
+              const channels = [
             { name: "TF1", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/tf1plus/tf1.m3u8", logo: "tf1.png" },
             { name: "France 2", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france2.m3u8", logo: "france2.png" },
             { name: "France 3", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france3.m3u8", logo: "france3.png" },
-            { name: "Canal+", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/canal/canalplus.m3u8", logo: "canal.png" },
+            { name: "Canal+", stream: "https://geo.dailymotion.com/player.html?video=x5gv6be", logo: "canal.png" },
             { name: "France 5", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france5.m3u8", logo: "france5.png" },
-            { name: "Arte", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/arte/arte.m3u8", logo: "arte.png" },
-            { name: "LCP", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/lcp/lcp.m3u8", logo: "lcp.png" },
-            { name: "Public Sénat", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/publicsenat/publicsenat.m3u8", logo: "public.png" },
-            { name: "BFM TV", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/bfmtv/bfmtv.m3u8", logo: "bfm.png" },
-            { name: "CNews", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/cnews/cnews.m3u8", logo: "cnwes.png" }
-            // Tu peux ajouter d'autres chaînes avec leurs fichiers vidéos sur GitHub ici
-        ];
-
-        function loadChannels() {
+            { name: "Arte", stream: "https://geo.dailymotion.com/player.html?video=xgepjr", logo: "arte.png" },
+            { name: "LCP", stream: "https://geo.dailymotion.com/player.html?video=xkxbzc", logo: "lcp.png" },
+            { name: "Public Sénat", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france4.m3u8", logo: "public.png" },
+            { name: "BFM TV", stream: "bfmtv.m3u8", logo: "bfm.png" },
+            { name: "CNews", stream: "https://www.dailymotion.com/video/x3b68jn", logo: "cnwes.png" },
+            { name: "CStar", stream: "https://geo.dailymotion.com/player.html?video=x5gv5v0", logo: "cstar.png" },
+            { name: "TF1 Series Films", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/tf1plus/tf1-series-films.m3u8", logo: "tf1sf.png" },
+            { name: "L'Equipe", stream: "https://geo.dailymotion.com/player.html?video=x2lefik", logo: "equipe.png" },
+            { name: "RMC Story", stream: "rmcstory.m3u8", logo: "rmcstory.png" },
+            { name: "RMC Découverte", stream: "rmcdecouverte.m3u8", logo: "rmcdecouverte.png" },
+            { name: "Cherry 25", stream: "cherry25.m3u8", logo: "cherry.png" },
+            { name: "France Info", stream: "https://raw.githubusercontent.com/ipstreet312/freeiptv/master/ressources/ftv/py/frin.m3u8", logo: "franceinfo.png" },
+            { name: "LCI", stream: "https://raw.githubusercontent.com/ipstreet312/freeiptv/master/ressources/btv/py/lci1.m3u8", logo: "lci.png" }
+        ];        function loadChannels() {
             const container = document.getElementById("channel-list");
             container.innerHTML = "";
 
@@ -114,8 +131,33 @@
 
         function playChannel(streamUrl) {
             const video = document.getElementById("video");
-            video.src = streamUrl; // Mettre directement l'URL du flux vidéo depuis GitHub.io
-            video.play();
+            const dailymotionContainer = document.getElementById("dailymotion-container");
+            const videoContainer = document.getElementById("video-container");
+
+            // Cacher la vidéo pour les flux non HLS
+            video.style.display = "none";
+            dailymotionContainer.style.display = "none";
+
+            // Si le flux est un lien HLS (.m3u8)
+            if (streamUrl.endsWith('.m3u8')) {
+                if (Hls.isSupported()) {
+                    const hls = new Hls();
+                    hls.loadSource(streamUrl);
+                    hls.attachMedia(video);
+                    video.style.display = "block";
+                    video.play();
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = streamUrl;
+                    video.style.display = "block";
+                    video.play();
+                }
+            }
+            // Si le flux est une vidéo Dailymotion
+            else if (streamUrl.includes('dailymotion.com')) {
+                const iframe = document.getElementById("dailymotion-iframe");
+                iframe.src = streamUrl;
+                dailymotionContainer.style.display = "block";
+            }
         }
 
         loadChannels();
