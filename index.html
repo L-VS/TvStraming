@@ -2,11 +2,10 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TV Streaming</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        /* Styles de base */
         body {
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #1e1e1e, #3a3a3a);
@@ -18,12 +17,6 @@
             position: relative;
         }
 
-        /* Pour empêcher le zoom sur les smartphones */
-        html, body {
-            touch-action: manipulation;
-        }
-
-        /* Heure en haut à droite */
         .header {
             position: absolute;
             top: 10px;
@@ -31,32 +24,6 @@
             font-size: 1.5em;
         }
 
-        /* Conteneur pour les vidéos et boutons */
-        #video-container {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        video {
-            width: 100%;
-            max-width: 800px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
-        }
-
-        iframe {
-            width: 100%;
-            max-width: 800px;
-            height: 450px;
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Liste des chaînes */
         .container {
             display: flex;
             flex-wrap: wrap;
@@ -86,39 +53,46 @@
             border-radius: 5px;
         }
 
-        /* Style des boutons */
-        .button-container {
-            display: flex;
-            justify-content: center;
+        #video-container {
             margin-top: 20px;
         }
 
-        .btn {
-            background-color: #007BFF;
+        video {
+            width: 80%;
+            max-width: 800px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Style pour les boutons de défilement */
+        .scroll-btn {
+            position: fixed;
+            background-color: rgba(0, 0, 0, 0.6);
             color: white;
-            padding: 10px 20px;
-            font-size: 1.1em;
             border: none;
-            border-radius: 5px;
+            padding: 20px;
+            font-size: 24px;
+            border-radius: 50%;
             cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
             transition: background-color 0.3s;
         }
 
-        .btn:hover {
-            background-color: #0056b3;
+        /* Effet au survol du bouton */
+        .scroll-btn:hover {
+            background-color: rgba(0, 0, 0, 0.8);
         }
 
-        .btn:focus {
-            outline: none;
+        /* Bouton de descente */
+        #scroll-down-btn {
+            right: 20px;
+            bottom: 20px;
         }
 
-        /* Empêcher le zoom sur mobile */
-        body, html {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+        /* Bouton de remontée */
+        #scroll-up-btn {
+            left: 20px;
+            bottom: 20px;
         }
     </style>
 </head>
@@ -126,24 +100,20 @@
     <div class="header" id="clock"></div>
     <h1>TV Streaming</h1>
     
-    <!-- Conteneur de la vidéo -->
     <div id="video-container">
-        <video id="video" controls style="display:none;"></video>
-        <div id="dailymotion-container" style="display:none;">
-            <iframe id="dailymotion-iframe" src="" allow="autoplay; encrypted-media" frameborder="0"></iframe>
-        </div>
+        <video id="video" controls></video>
     </div>
 
-    <!-- Liste des chaînes -->
     <div class="container" id="channel-list"></div>
 
-    <!-- Boutons pour descendre -->
-    <div class="button-container">
-        <button class="btn" id="scrollDownBtn">Descendre</button>
-    </div>
+    <!-- Bouton pour descendre -->
+    <button class="scroll-btn" id="scroll-down-btn">&#8595;</button>
+
+    <!-- Bouton pour remonter -->
+    <button class="scroll-btn" id="scroll-up-btn">&#8593;</button>
 
     <script>
-        // Fonction pour afficher l'heure
+        // Fonction de mise à jour de l'heure
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString();
@@ -151,17 +121,28 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Liste des chaînes de TV et leurs liens
         const channels = [
             { name: "TF1", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/tf1plus/tf1.m3u8", logo: "tf1.png" },
             { name: "France 2", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france2.m3u8", logo: "france2.png" },
             { name: "France 3", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france3.m3u8", logo: "france3.png" },
             { name: "Canal+", stream: "https://geo.dailymotion.com/player.html?video=x5gv6be", logo: "canal.png" },
             { name: "France 5", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france5.m3u8", logo: "france5.png" },
-            { name: "Arte", stream: "https://geo.dailymotion.com/player.html?video=xgepjr", logo: "arte.png" }
+            { name: "Arte", stream: "https://geo.dailymotion.com/player.html?video=xgepjr", logo: "arte.png" },
+            { name: "LCP", stream: "https://geo.dailymotion.com/player.html?video=xkxbzc", logo: "lcp.png" },
+            { name: "Public Sénat", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france4.m3u8", logo: "public.png" },
+            { name: "BFM TV", stream: "bfmtv.m3u8", logo: "bfm.png" },
+            { name: "CNews", stream: "https://www.dailymotion.com/video/x3b68jn", logo: "cnwes.png" },
+            { name: "CStar", stream: "https://geo.dailymotion.com/player.html?video=x5gv5v0", logo: "cstar.png" },
+            { name: "TF1 Series Films", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/tf1plus/tf1-series-films.m3u8", logo: "tf1sf.png" },
+            { name: "L'Equipe", stream: "https://geo.dailymotion.com/player.html?video=x2lefik", logo: "equipe.png" },
+            { name: "RMC Story", stream: "rmcstory.m3u8", logo: "rmcstory.png" },
+            { name: "RMC Découverte", stream: "rmcdecouverte.m3u8", logo: "rmcdecouverte.png" },
+            { name: "Cherry 25", stream: "cherry25.m3u8", logo: "cherry.png" },
+            { name: "France Info", stream: "https://raw.githubusercontent.com/ipstreet312/freeiptv/master/ressources/ftv/py/frin.m3u8", logo: "franceinfo.png" },
+            { name: "LCI", stream: "https://raw.githubusercontent.com/ipstreet312/freeiptv/master/ressources/btv/py/lci1.m3u8", logo: "lci.png" }
         ];
 
-        // Fonction pour charger les chaînes
+        // Charger les chaînes
         function loadChannels() {
             const container = document.getElementById("channel-list");
             container.innerHTML = "";
@@ -178,44 +159,40 @@
             });
         }
 
-        // Fonction pour lire le flux vidéo
+        // Lancer la lecture d'une chaîne
         function playChannel(streamUrl) {
             const video = document.getElementById("video");
-            const dailymotionContainer = document.getElementById("dailymotion-container");
-            const videoContainer = document.getElementById("video-container");
-
-            // Cacher la vidéo pour les flux non HLS
-            video.style.display = "none";
-            dailymotionContainer.style.display = "none";
-
-            // Si le flux est un lien HLS (.m3u8)
-            if (streamUrl.endsWith('.m3u8')) {
-                if (Hls.isSupported()) {
-                    const hls = new Hls();
-                    hls.loadSource(streamUrl);
-                    hls.attachMedia(video);
-                    video.style.display = "block";
-                    video.play();
-                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    video.src = streamUrl;
-                    video.style.display = "block";
-                    video.play();
-                }
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = streamUrl;
             }
-            // Si le flux est une vidéo Dailymotion
-            else if (streamUrl.includes('dailymotion.com')) {
-                const iframe = document.getElementById("dailymotion-iframe");
-                iframe.src = streamUrl;
-                dailymotionContainer.style.display = "block";
-            }
+            video.play();
         }
 
-        // Fonction pour faire défiler la page vers le bas
-        document.getElementById("scrollDownBtn").addEventListener("click", function() {
-            window.scrollBy(0, 600); // Faire défiler de 600px
+        loadChannels();
+
+        // Fonction pour descendre
+        const scrollDownButton = document.getElementById("scroll-down-btn");
+        scrollDownButton.addEventListener("click", () => {
+            window.scrollBy({
+                top: 250,
+                left: 0,
+                behavior: "smooth"
+            });
         });
 
-        loadChannels();
+        // Fonction pour remonter
+        const scrollUpButton = document.getElementById("scroll-up-btn");
+        scrollUpButton.addEventListener("click", () => {
+            window.scrollBy({
+                top: -250,
+                left: 0,
+                behavior: "smooth"
+            });
+        });
     </script>
 </body>
 </html>
