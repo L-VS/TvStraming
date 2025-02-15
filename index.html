@@ -3,85 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV Streaming</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>Lecteur TV</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1e1e1e, #3a3a3a);
-            color: white;
+        .player-container {
+            max-width: 800px;
+            margin: 20px auto;
             text-align: center;
-            margin: 0;
-            padding: 20px;
-            overflow: hidden;
-            position: relative;
         }
-
-        .header {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            font-size: 1.5em;
-        }
-
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .channel {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            margin: 15px;
-            width: 250px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s;
-            text-align: center;
-            cursor: pointer;
-        }
-
-        .channel:hover {
-            transform: scale(1.05);
-        }
-
-        .channel img {
+        .logo {
             width: 100px;
             height: auto;
-            border-radius: 5px;
+            margin: 10px;
         }
-
-        #video-container {
-            margin-top: 20px;
-        }
-
-        video {
-            width: 80%;
-            max-width: 800px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        .channel-button {
+            display: inline-block;
+            text-align: center;
+            margin: 10px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="header" id="clock"></div>
-    <h1>TV Streaming</h1>
-    <div id="video-container">
-        <video id="video" controls></video>
+    <div class="player-container">
+        <h1>Lecteur TV</h1>
+        <video id="videoPlayer" width="100%" controls>
+            Votre navigateur ne supporte pas la balise vidéo.
+        </video>
+        <div id="channelList"></div>
     </div>
 
-    <div class="container" id="channel-list"></div>
-
     <script>
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString();
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
         const channels = [
             { name: "TF1", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/tf1plus/tf1.m3u8", logo: "tf1.png" },
             { name: "France 2", stream: "https://raw.githubusercontent.com/Paradise-91/ParaTV/main/streams/francetv/france2.m3u8", logo: "france2.png" },
@@ -103,118 +54,31 @@
             { name: "LCI", stream: "https://raw.githubusercontent.com/ipstreet312/freeiptv/master/ressources/btv/py/lci1.m3u8", logo: "lci.png" }
         ];
 
-        function loadChannels() {
-            const container = document.getElementById("channel-list");
-            container.innerHTML = "";
+        const videoPlayer = document.getElementById('videoPlayer');
+        const channelList = document.getElementById('channelList');
 
-            channels.forEach(channel => {
-                const channelDiv = document.createElement("div");
-                channelDiv.classList.add("channel");
-                channelDiv.innerHTML = `
-                    <img src="${channel.logo}" alt="${channel.name} Logo">
-                    <h3>${channel.name}</h3>
-                `;
-                channelDiv.addEventListener("click", () => playChannel(channel.stream));
-                container.appendChild(channelDiv);
-            });
-        }
-
-        function playChannel(streamUrl) {
-            const video = document.getElementById("video");
-            if (Hls.isSupported()) {
-                const hls = new Hls();
-                hls.loadSource(streamUrl);
-                hls.attachMedia(video);
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = streamUrl;
+        // Fonction pour charger un canal
+        function loadChannel(channel) {
+            if (channel.stream.includes("dailymotion")) {
+                videoPlayer.src = channel.stream; // URL Dailymotion
+            } else {
+                videoPlayer.src = channel.stream; // URL M3U8
             }
-            video.play();
+            videoPlayer.play();
         }
 
-        loadChannels();
+        // Créer la liste de chaînes
+        channels.forEach(channel => {
+            const channelDiv = document.createElement('div');
+            channelDiv.classList.add('channel-button');
+
+            channelDiv.innerHTML = `
+                <img src="${channel.logo}" alt="${channel.name}" class="logo">
+                <br>
+                <button onclick="loadChannel(${JSON.stringify(channel)})">${channel.name}</button>
+            `;
+            channelList.appendChild(channelDiv);
+        });
     </script>
 </body>
 </html>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Défilement Haut et Bas</title>
-    <style>
-        /* Style de base pour le contenu */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            height: 200vh; /* Pour permettre le défilement */
-            background-color: #f4f4f4;
-        }
-
-        /* Style pour le bouton de défilement vers le bas */
-        .scroll-btn {
-            position: fixed;
-            background-color: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: none;
-            padding: 20px;
-            font-size: 24px;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-            transition: background-color 0.3s;
-        }
-
-        /* Effet au survol du bouton */
-        .scroll-btn:hover {
-            background-color: rgba(0, 0, 0, 0.8);
-        }
-
-        /* Bouton de descente */
-        #scroll-down-btn {
-            right: 20px;
-            bottom: 20px;
-        }
-
-        /* Bouton de remontée */
-        #scroll-up-btn {
-            left: 20px;
-            bottom: 20px;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- Bouton pour descendre -->
-    <button class="scroll-btn" id="scroll-down-btn">&#8595;</button>
-
-    <!-- Bouton pour remonter -->
-    <button class="scroll-btn" id="scroll-up-btn">&#8593;</button>
-
-    <script>
-        // Sélection des boutons
-        const scrollDownButton = document.getElementById("scroll-down-btn");
-        const scrollUpButton = document.getElementById("scroll-up-btn");
-
-        // Écouteur d'événement pour descendre
-        scrollDownButton.addEventListener("click", () => {
-            window.scrollBy({
-                top: 250,  // Défilement de 250 pixels vers le bas
-                left: 0,
-                behavior: "smooth"  // Animation fluide
-            });
-        });
-
-        // Écouteur d'événement pour remonter
-        scrollUpButton.addEventListener("click", () => {
-            window.scrollBy({
-                top: -250,  // Défilement de 250 pixels vers le haut
-                left: 0,
-                behavior: "smooth"  // Animation fluide
-            });
-        });
-    </script>
-
-</body>
-</html>
-
