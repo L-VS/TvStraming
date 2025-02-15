@@ -135,4 +135,86 @@
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Défilement Haut et Bas</title>
+    <style>
+        /* Style de base pour le contenu */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 200vh; /* Pour permettre le défilement */
+            background-color: #f4f4f4;
+        }
+
+        /* Style pour le bouton de défilement vers le bas */
+        .scroll-btn {
+            position: fixed;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            transition: background-color 0.3s;
+        }
+
+        /* Effet au survol du bouton */
+        .scroll-btn:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        /* Bouton de descente */
+        #scroll-down-btn {
+            right: 20px;
+            bottom: 20px;
+        }
+
+        /* Bouton de remontée */
+        #scroll-up-btn {
+            left: 20px;
+            bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Bouton pour descendre -->
+    <button class="scroll-btn" id="scroll-down-btn">&#8595;</button>
+
+    <!-- Bouton pour remonter -->
+    <button class="scroll-btn" id="scroll-up-btn">&#8593;</button>
+
+    <script>
+        // Sélection des boutons
+        const scrollDownButton = document.getElementById("scroll-down-btn");
+        const scrollUpButton = document.getElementById("scroll-up-btn");
+
+        // Écouteur d'événement pour descendre
+        scrollDownButton.addEventListener("click", () => {
+            window.scrollBy({
+                top: 250,  // Défilement de 250 pixels vers le bas
+                left: 0,
+                behavior: "smooth"  // Animation fluide
+            });
+        });
+
+        // Écouteur d'événement pour remonter
+        scrollUpButton.addEventListener("click", () => {
+            window.scrollBy({
+                top: -250,  // Défilement de 250 pixels vers le haut
+                left: 0,
+                behavior: "smooth"  // Animation fluide
+            });
+        });
+    </script>
+
+</body>
+</html>
 
